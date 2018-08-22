@@ -68,3 +68,20 @@ RESULT=$(ps x | grep -v grep | grep -c ${SERVICE})
 if [ "${RESULT}" -gt 3 ]; then
 	exit 0
 fi
+
+###############         Now we'll have a look at the content of the directories #####################
+
+#http://moinne.com/blog/ronald/bash/list-directory-names-in-bash-shell
+#--time-style is used here to ensure awk $8 will return the right thing (dir name)
+
+SAMPLES=$(ls -l --time-style="long-iso" ${TODO_DIR} | egrep '^d' | awk '{print $8}')
+for SAMPLE in ${SAMPLES}
+do
+	#VCF=(ls -l --time-style="long-iso" ${TODO_DIR}/${SAMPLE}  | egrep '^-'  | awk '{print $8}' | egrep '*.vcf')
+	echo "$(date) -- Launching captainAchab workflow for ${SAMPLE}"
+	echo "${SH} ${CWW} -e ${CROMWELL_JAR} -o ${OPTIONS_JSON} -c ${CROMWELL_CONF} -w ${CAPTAINACHAB_WDL} -i ${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json"
+	if [ "$?" -eq 0 ];then
+		cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/"
+		echo "$(date) -- Job finished for ${SAMPLE}"
+	fi
+done
