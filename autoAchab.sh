@@ -79,7 +79,7 @@ for SAMPLE in ${SAMPLES}
 do
 	#VCF=(ls -l --time-style="long-iso" ${TODO_DIR}/${SAMPLE}  | egrep '^-'  | awk '{print $8}' | egrep '*.vcf')
 	echo "$(date) -- Launching captainAchab workflow for ${SAMPLE}"
-	echo "${SH} ${CWW} -e ${CROMWELL_JAR} -o ${OPTIONS_JSON} -c ${CROMWELL_CONF} -w ${CAPTAINACHAB_WDL} -i ${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json"
+	${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json"
 	if [ "$?" -eq 0 ];then
 		cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/"
 		echo "$(date) -- Job finished for ${SAMPLE}"
