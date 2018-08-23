@@ -91,6 +91,16 @@ if [ "${RESULT}" -gt 3 ]; then
 	exit 0
 fi
 
+###############		function for admin tasks
+
+admin() 
+	mkdir "$1"
+	cp "$2" "$1"
+	cp "$3" "$1"
+	cp "$4" "$1"
+}
+
+
 ###############         Now we'll have a look at the content of the directories #####################
 
 #http://moinne.com/blog/ronald/bash/list-directory-names-in-bash-shell
@@ -107,10 +117,11 @@ do
 	info "tail -f ${LOG_FILE}"
 	${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" >${LOG_FILE} 2>&1
 	if [ "$?" -eq 0 ];then
-		mkdir "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
-		cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
-		cp "${TODO_DIR}/${SAMPLE}/disease.txt" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
-		cp "${LOG_FILE}" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+		admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${LOG_FILE}"
+		#mkdir "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+		#cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+		#cp "${TODO_DIR}/${SAMPLE}/disease.txt" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+		#cp "${LOG_FILE}" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
 		#put rm here
 		rm -r "${TODO_DIR}/${SAMPLE}"
 		info "Genuine Job finished for ${SAMPLE}"
@@ -121,9 +132,7 @@ do
 		info "tail -f ${LOG_FILE}"
 		${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF_NODB_NOCACHE}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json"  >>${LOG_FILE} 2>&1
 		if [ "$?" -eq 0 ];then
-			cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
-			cp "${TODO_DIR}/${SAMPLE}/disease.txt" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
-			cp "${LOG_FILE}" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+			admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${LOG_FILE}"
 			#put rm here
 			rm -r "${TODO_DIR}/${SAMPLE}"
 			info "Relaunched Job finished for ${SAMPLE}"
