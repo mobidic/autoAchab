@@ -78,14 +78,15 @@ SAMPLES=$(ls -l --time-style="long-iso" ${TODO_DIR} | egrep '^d' | awk '{print $
 for SAMPLE in ${SAMPLES}
 do
 	#VCF=(ls -l --time-style="long-iso" ${TODO_DIR}/${SAMPLE}  | egrep '^-'  | awk '{print $8}' | egrep '*.vcf')
-	echo "[`date +'%Y-%m-%d %H:%M:%S'`] - Launching captainAchab workflow for ${SAMPLE}"
+	echo "[`date +'%Y-%m-%d %H:%M:%S'`] - autoAchab 1.0: Launching captainAchab workflow for ${SAMPLE}"
 	${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json"
 	if [ "$?" -eq 0 ];then
 		cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/"
 		#put rm here
 		rm -r "${TODO_DIR}/${SAMPLE}"
-		echo "[`date +'%Y-%m-%d %H:%M:%S'`] -  Job finished for ${SAMPLE}"
+		echo "[`date +'%Y-%m-%d %H:%M:%S'`] - autoAchab 1.0: Job finished for ${SAMPLE}"
 	else
-		echo "[`date +'%Y-%m-%d %H:%M:%S'`] - Error with ${SAMPLE}" 
+		echo "[`date +'%Y-%m-%d %H:%M:%S'`] - autoAchab 1.0: Error with ${SAMPLE}"
+		exit 1
 	fi
 done
