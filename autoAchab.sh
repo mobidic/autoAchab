@@ -51,17 +51,17 @@ NC='\033[0m'
 
 # -- Log functions got from cww.sh -- simplified here
 
-error() { log "${RED}ERROR${NC} : $1" ; }
-warning() { log "${YELLOW}WARNING${NC} : $1" ; }
-info() { log "${BLUE}INFO${NC} : $1" ; }
-debug() { log "${LIGHTRED}DEBUG${NC} : $1" ; }
+error() { log "[${RED}error${NC}]" "$1" ; }
+warning() { log "[${YELLOW}warn${NC}]" "$1" ; }
+info() { log "[${BLUE}info${NC}]" "$1" ; }
+debug() { log "[${LIGHTRED}debug${NC}]" "$1" ; }
 
 # -- Print log 
 
 echoerr() { echo -e "$@" 1>&2 ; }
 
 log() {
-	echoerr "[`date +'%Y-%m-%d %H:%M:%S'`] - autoAchab version : ${VERSION} - $1"
+	echoerr "[`date +'%Y-%m-%d %H:%M:%S'`] $1 - autoAchab version : ${VERSION} - $2"
 }
 
 
@@ -100,16 +100,37 @@ SAMPLES=$(ls -l --time-style="long-iso" ${TODO_DIR} | egrep '^d' | awk '{print $
 for SAMPLE in ${SAMPLES}
 do
 	#VCF=(ls -l --time-style="long-iso" ${TODO_DIR}/${SAMPLE}  | egrep '^-'  | awk '{print $8}' | egrep '*.vcf')
-	info "Launching captainAchab workflow for ${SAMPLE}"
-	${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json"
+	LOG_FILE="${TODO_DIR}/${SAMPLE}/autoAchab.log"
+	touch ${LOG_FILE}
+	echo ""
+	info "Launching captainAchab workflow for ${SAMPLE}, to follow check:"
+	info "tail -f ${LOG_FILE}"
+	${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" >${LOG_FILE} 2>&1
 	if [ "$?" -eq 0 ];then
-		cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/"
+		mkdir "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+		cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+		cp "${TODO_DIR}/${SAMPLE}/disease.txt" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+		cp "${LOG_FILE}" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
 		#put rm here
 		rm -r "${TODO_DIR}/${SAMPLE}"
-		info "Job finished for ${SAMPLE}"
+		info "Genuine Job finished for ${SAMPLE}"
 	else
-		cp "${TODO_DIR}/${SAMPLE}" "${ERROR_DIR}"
-		error "${SAMPLE} was not treated correctly - Please contact an Admin to check"
-		exit 1
+		#relaunch in nodb no cache mode
+		warning "First attempt failed, relaunching ${SAMPLE} in nodb, nocache mode"
+		info "to follow, check:"
+		info "tail -f ${LOG_FILE}"
+		${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF_NODB_NOCACHE}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json"  >>${LOG_FILE} 2>&1
+		if [ "$?" -eq 0 ];then
+			cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+			cp "${TODO_DIR}/${SAMPLE}/disease.txt" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+			cp "${LOG_FILE}" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+			#put rm here
+			rm -r "${TODO_DIR}/${SAMPLE}"
+			info "Relaunched Job finished for ${SAMPLE}"
+		else
+			mv "${TODO_DIR}/${SAMPLE}" "${ERROR_DIR}"
+			error "${SAMPLE} was not treated correctly - Please contact an Admin to check log file at ${ERROR_DIR}/${SAMPLE}/autoAchab.log"
+			exit 1
+		fi
 	fi
 done
