@@ -83,7 +83,7 @@ do
 	if [ "$?" -eq 0 ];then
 		cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/"
 		#put rm here
-		rm "${TODO_DIR}/${SAMPLE}"
+		rm -r "${TODO_DIR}/${SAMPLE}"
 		echo "[`date +'%Y-%m-%d %H:%M:%S'`] -  Job finished for ${SAMPLE}"
 	else
 		echo "[`date +'%Y-%m-%d %H:%M:%S'`] - Error with ${SAMPLE}" 
