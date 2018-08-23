@@ -91,11 +91,6 @@ if [ "${RESULT}" -gt 3 ]; then
 	exit 0
 fi
 
-##############		log file
-
-LOG_FILE="${TODO_DIR}/${SAMPLE}/autoAchab.log"
-touch ${LOG_FILE}
-exec &>${LOG_FILE}
 
 ###############		function for admin tasks
 
@@ -113,41 +108,50 @@ admin() {
 #--time-style is used here to ensure awk $8 will return the right thing (dir name)
 
 SAMPLES=$(ls -l --time-style="long-iso" ${TODO_DIR} | egrep '^d' | awk '{print $8}')
-for SAMPLE in ${SAMPLES}
-do
-	VCF=(ls -l --time-style="long-iso" ${TODO_DIR}/${SAMPLE}  | egrep '^-'  | awk '{print $8}' | egrep '*.vcf')
-	if [ -f "${TODO_DIR}/${SAMPLE}/${VCF}" ] && [ -f "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" ] && [ -f "${TODO_DIR}/${SAMPLE}/disease.txt" ];then 	
-		echo ""
-		info "Launching captainAchab workflow for ${SAMPLE}, to follow check:"
-		info "tail -f ${LOG_FILE}"
-		${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" >>${LOG_FILE} 2>&1
-		if [ "$?" -eq 0 ];then
-			admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}"
-			#mkdir "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
-			#cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
-			#cp "${TODO_DIR}/${SAMPLE}/disease.txt" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
-			#cp "${LOG_FILE}" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
-			#put rm here
-			rm -r "${TODO_DIR}/${SAMPLE}"
-			info "Genuine Job finished for ${SAMPLE}"
-		else
-			#relaunch in nodb no cache mode
-			warning "First attempt failed, relaunching ${SAMPLE} in nodb, nocache mode"
-			info "to follow, check:"
+if [ -c "${SAMPLES}" ];then
+	for SAMPLE in ${SAMPLES}
+	do
+		##############		log file
+
+		LOG_FILE="${TODO_DIR}/${SAMPLE}/autoAchab.log"
+		touch ${LOG_FILE}
+		exec &>${LOG_FILE}
+		echo "ls -l --time-style='long-iso' ${TODO_DIR}/${SAMPLE}  | egrep '^-'  | awk '{print $8}' | egrep '*.vcf')"
+		exit
+		VCF=$(ls -l --time-style="long-iso" "${TODO_DIR}/${SAMPLE}" | egrep '^-' | awk '{print $8}' | egrep '*.vcf')	
+		if [ -f "${TODO_DIR}/${SAMPLE}/${VCF}" ] && [ -f "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" ] && [ -f "${TODO_DIR}/${SAMPLE}/disease.txt" ];then 	
+			echo ""
+			info "Launching captainAchab workflow for ${SAMPLE}, to follow check:"
 			info "tail -f ${LOG_FILE}"
-			${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF_NODB_NOCACHE}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json"  >>${LOG_FILE} 2>&1
+			${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" >>${LOG_FILE} 2>&1
 			if [ "$?" -eq 0 ];then
 				admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}"
+				#mkdir "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+				#cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+				#cp "${TODO_DIR}/${SAMPLE}/disease.txt" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
+				#cp "${LOG_FILE}" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
 				#put rm here
 				rm -r "${TODO_DIR}/${SAMPLE}"
-				info "Relaunched Job finished for ${SAMPLE}"
+				info "Genuine Job finished for ${SAMPLE}"
 			else
-				mv "${TODO_DIR}/${SAMPLE}" "${ERROR_DIR}"
-				error "${SAMPLE} was not treated correctly - Please contact an Admin to check log file at ${ERROR_DIR}/${SAMPLE}/autoAchab.log"
-				exit 1
+				#relaunch in nodb no cache mode
+				warning "First attempt failed, relaunching ${SAMPLE} in nodb, nocache mode"
+				info "to follow, check:"
+				info "tail -f ${LOG_FILE}"
+				${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF_NODB_NOCACHE}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json"  >>${LOG_FILE} 2>&1
+				if [ "$?" -eq 0 ];then
+					admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}"
+					#put rm here
+					rm -r "${TODO_DIR}/${SAMPLE}"
+					info "Relaunched Job finished for ${SAMPLE}"
+				else
+					mv "${TODO_DIR}/${SAMPLE}" "${ERROR_DIR}"
+					error "${SAMPLE} was not treated correctly - Please contact an Admin to check log file at ${ERROR_DIR}/${SAMPLE}/autoAchab.log"
+					exit 1
+				fi
 			fi
+		else
+			error "Folder incomplete or error in file names for sample ${SAMPLE}"
 		fi
-	else
-		error "Folder incomplete or error in file names for sample ${SAMPLE}"
-	fi
-done
+	done
+fi
