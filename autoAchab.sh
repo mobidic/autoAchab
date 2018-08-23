@@ -43,6 +43,28 @@ if [ $# -ne 0 ]; then
 	exit 1
 fi
 
+RED='\033[0;31m'
+LIGHTRED='\033[1;31m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# -- Log functions got from cww.sh -- simplified here
+
+error() { log "${RED}ERROR${NC} : $1" ; }
+warning() { log "${YELLOW}WARNING${NC} : $1" ; }
+info() { log "${BLUE}INFO${NC} : $1" ; }
+debug() { log "${LIGHTRED}DEBUG${NC} : $1" ; }
+
+# -- Print log 
+
+echoerr() { echo -e "$@" 1>&2 ; }
+
+log() {
+	echoerr "[`date +'%Y-%m-%d %H:%M:%S'`] - autoAchab version : ${VERSION} - $1"
+}
+
+
 
 ###############		Get options from conf file			##################################
 
@@ -52,7 +74,7 @@ CONFIG_FILE='/home/neuro_admin/autoAchab/autoAchab.conf'
 
 UNKNOWN=$(cat  ${CONFIG_FILE} | grep -Evi "^(#.*|[A-Z0-9_]*=[a-z0-9_ \.\/\$\{\}]*)$")
 if [ -n "${UNKNOWN}" ]; then
-	echo "Error in config file. Not allowed lines:"
+	error "Error in config file. Not allowed lines:"
 	echo ${UNKNOWN}
 	exit 1
 fi
@@ -78,15 +100,16 @@ SAMPLES=$(ls -l --time-style="long-iso" ${TODO_DIR} | egrep '^d' | awk '{print $
 for SAMPLE in ${SAMPLES}
 do
 	#VCF=(ls -l --time-style="long-iso" ${TODO_DIR}/${SAMPLE}  | egrep '^-'  | awk '{print $8}' | egrep '*.vcf')
-	echo "[`date +'%Y-%m-%d %H:%M:%S'`] - autoAchab 1.0: Launching captainAchab workflow for ${SAMPLE}"
+	info "Launching captainAchab workflow for ${SAMPLE}"
 	${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json"
 	if [ "$?" -eq 0 ];then
 		cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/"
 		#put rm here
 		rm -r "${TODO_DIR}/${SAMPLE}"
-		echo "[`date +'%Y-%m-%d %H:%M:%S'`] - autoAchab 1.0: Job finished for ${SAMPLE}"
+		info "Job finished for ${SAMPLE}"
 	else
-		echo "[`date +'%Y-%m-%d %H:%M:%S'`] - autoAchab 1.0: Error with ${SAMPLE}"
+		cp "${TODO_DIR}/${SAMPLE}" "${ERROR_DIR}"
+		error "${SAMPLE} was not treated correctly - Please contact an Admin to check"
 		exit 1
 	fi
 done
