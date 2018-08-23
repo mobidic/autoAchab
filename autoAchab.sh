@@ -108,7 +108,8 @@ admin() {
 #--time-style is used here to ensure awk $8 will return the right thing (dir name)
 
 SAMPLES=$(ls -l --time-style="long-iso" ${TODO_DIR} | egrep '^d' | awk '{print $8}')
-if [ -c "${SAMPLES}" ];then
+#debug "Samples: --${SAMPLES}--"
+if [ "${SAMPLES}" != '' ];then
 	for SAMPLE in ${SAMPLES}
 	do
 		##############		log file
@@ -116,8 +117,6 @@ if [ -c "${SAMPLES}" ];then
 		LOG_FILE="${TODO_DIR}/${SAMPLE}/autoAchab.log"
 		touch ${LOG_FILE}
 		exec &>${LOG_FILE}
-		echo "ls -l --time-style='long-iso' ${TODO_DIR}/${SAMPLE}  | egrep '^-'  | awk '{print $8}' | egrep '*.vcf')"
-		exit
 		VCF=$(ls -l --time-style="long-iso" "${TODO_DIR}/${SAMPLE}" | egrep '^-' | awk '{print $8}' | egrep '*.vcf')	
 		if [ -f "${TODO_DIR}/${SAMPLE}/${VCF}" ] && [ -f "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" ] && [ -f "${TODO_DIR}/${SAMPLE}/disease.txt" ];then 	
 			echo ""
