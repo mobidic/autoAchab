@@ -93,7 +93,7 @@ fi
 
 ###############		function for admin tasks
 
-admin() 
+admin() { 
 	mkdir "$1"
 	cp "$2" "$1"
 	cp "$3" "$1"
