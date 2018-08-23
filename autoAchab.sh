@@ -117,7 +117,7 @@ do
 	info "tail -f ${LOG_FILE}"
 	${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" >${LOG_FILE} 2>&1
 	if [ "$?" -eq 0 ];then
-		admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${LOG_FILE}"
+		admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}"
 		#mkdir "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
 		#cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
 		#cp "${TODO_DIR}/${SAMPLE}/disease.txt" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
@@ -132,7 +132,7 @@ do
 		info "tail -f ${LOG_FILE}"
 		${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF_NODB_NOCACHE}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json"  >>${LOG_FILE} 2>&1
 		if [ "$?" -eq 0 ];then
-			admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${LOG_FILE}"
+			admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}"
 			#put rm here
 			rm -r "${TODO_DIR}/${SAMPLE}"
 			info "Relaunched Job finished for ${SAMPLE}"
