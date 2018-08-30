@@ -15,7 +15,7 @@ autoAchab is a script which goal is to properly and easily launch captainAchab w
 
 ### Nice, but How?
 
-Simply provide in the input directory the VCF file, the disease.txt file for phenolyzer and a sampleID_inputs.json file ready for cromwell execution of theworkflow, then get your results in the output dir.
+Simply provide in the input directory the VCF file, the disease.txt file for phenolyzer and a sampleID_inputs.json file ready for cromwell execution of the workflow, then get your results in the output dir.
 
 All configuration is made through the autoAchab.conf file, which should be self-explanatory.
 
