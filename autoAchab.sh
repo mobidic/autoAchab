@@ -98,9 +98,40 @@ admin() {
 	cp "$2" "$1"
 	cp "$3" "$1"
 	cp "$4" "$1"
-	chmod -R 777 "${DONE_DIR}/${SAMPLE}"
+	chmod -R 777 "${DONE_DIR}/$5"
 }
 
+success() {
+	#success exit code -"${DONE_DIR}/$1/CaptainAchab/admin" - "${TODO_DIR}/$1/captainAchab_inputs.json" - "${TODO_DIR}/$1/disease.txt" - ${LOG_FILE} - (Genuine|Relaunched) - ${SAMPLE}
+	if [ "$1" -eq 0 ];then
+		admin "$2" "$3" "$4" "$5" "$7"
+		#admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}" "${SAMPLE}"
+		info "$6 Job finished for $7"
+		rm -r "${TODO_DIR}/$7"
+	elif [ "$6" == "Genuine" ];then
+		warning "First attempt failed, relaunching $7 in nodb, nocache mode"
+		info "to follow, check:"
+		info "tail -f $5"
+		launch "$7" "${CROMWELL_CONF_NODB_NOCACHE}" "$5" "Relaunched"
+		#launch $SAMPLE - conf - $LOG_FILE - (Genuine|Relaunched)
+	elif [ "$6" == "Relaunched" ];then
+		mv "${TODO_DIR}/$7" "${ERROR_DIR}"
+		error "$7 was not treated correctly - Please contact an Admin to check log file at ${ERROR_DIR}/$7/autoAchab.log"
+		exit 1
+	fi
+}
+
+launch() {
+	#launch $SAMPLE - conf - $LOG_FILE - (Genuine|Relaunched)
+	if [ "${ACHABILARITY}" -eq 0 ];then
+		${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "$2" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/$1/captainAchab_inputs.json" >>"$3" 2>&1
+		success "$?" "${DONE_DIR}/$1/CaptainAchab/admin" "${TODO_DIR}/$1/captainAchab_inputs.json" "${TODO_DIR}/$1/disease.txt" "$3" "$4" "$1"
+		#success exit code - selfexpl - selfexpl - selfexpl - ${LOG_FILE} - (Genuine|Relaunched) - ${SAMPLE}
+	else
+		${NOHUP} ${SINGULARITY} run -B ${ANNOVAR_PATH} achabilarity.simg  -o "${OPTIONS_JSON}" -c "$2" -i "${TODO_DIR}/$1/captainAchab_inputs.json" >>"$3" 2>&1
+		success "$?" "${DONE_DIR}/$1/CaptainAchab/admin" "${TODO_DIR}/$1/captainAchab_inputs.json" "${TODO_DIR}/$1/disease.txt" "$3" "$4" "$1"
+	fi
+}
 
 ###############         Now we'll have a look at the content of the directories #####################
 
@@ -122,35 +153,43 @@ if [ "${SAMPLES}" != '' ];then
 			echo ""
 			info "Launching captainAchab workflow for ${SAMPLE}, to follow check:"
 			info "tail -f ${LOG_FILE}"
-			${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" >>${LOG_FILE} 2>&1
-			if [ "$?" -eq 0 ];then
-				admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}"
-				#mkdir "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
-				#cp "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
-				#cp "${TODO_DIR}/${SAMPLE}/disease.txt" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
-				#cp "${LOG_FILE}" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin"
-				#put rm here
-				rm -r "${TODO_DIR}/${SAMPLE}"
-				info "Genuine Job finished for ${SAMPLE}"
-			else
+			launch "${SAMPLE}" "${CROMWELL_CONF}" "${LOG_FILE}" "Genuine"
+			#if [ "${ACHABILARITY}" -eq 0 ];then
+			#	${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" >>${LOG_FILE} 2>&1
+			#	success "$?" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}" "Genuine" "${SAMPLE}"
+			#else
+			#	${NOHUP} ${SINGULARITY} run -B ${ANNOVAR_PATH} achabilarity.simg  -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" >>${LOG_FILE} 2>&1
+			#	success "$?" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}" "Genuine" "${SAMPLE}"
+			#fi
+			#if [ "$?" -eq 0 ];then
+			#	admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}"
+			#	rm -r "${TODO_DIR}/${SAMPLE}"
+			#	info "Genuine Job finished for ${SAMPLE}"
+			#else
 				#relaunch in nodb no cache mode
-				warning "First attempt failed, relaunching ${SAMPLE} in nodb, nocache mode"
-				info "to follow, check:"
-				info "tail -f ${LOG_FILE}"
-				${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF_NODB_NOCACHE}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json"  >>${LOG_FILE} 2>&1
-				if [ "$?" -eq 0 ];then
-					admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}"
-					#put rm here
-					rm -r "${TODO_DIR}/${SAMPLE}"
-					info "Relaunched Job finished for ${SAMPLE}"
-				else
-					mv "${TODO_DIR}/${SAMPLE}" "${ERROR_DIR}"
-					error "${SAMPLE} was not treated correctly - Please contact an Admin to check log file at ${ERROR_DIR}/${SAMPLE}/autoAchab.log"
-					exit 1
-				fi
-			fi
+				#warning "First attempt failed, relaunching ${SAMPLE} in nodb, nocache mode"
+				#info "to follow, check:"
+				#info "tail -f ${LOG_FILE}"
+			#	if [ "${ACHABILARITY}" -eq 0 ];then
+			#		${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF_NODB_NOCACHE}" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json"  >>${LOG_FILE} 2>&1
+			#		success "$?" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}" "Relauncheda" "${SAMPLE}"
+			#	else
+			#		${NOHUP} ${SINGULARITY} run -B ${ANNOVAR_PATH} achabilarity.simg  -o "${OPTIONS_JSON}" -c "${CROMWELL_CONF}" -i "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" >>${LOG_FILE} 2>&1
+			#		success "$?" "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}" "Relaunched" "${SAMPLE}"
+			#	fi
+				#if [ "$?" -eq 0 ];then
+				#	admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}"
+				#	rm -r "${TODO_DIR}/${SAMPLE}"
+				#	info "Relaunched Job finished for ${SAMPLE}"
+				#else
+				#	mv "${TODO_DIR}/${SAMPLE}" "${ERROR_DIR}"
+				#	error "${SAMPLE} was not treated correctly - Please contact an Admin to check log file at ${ERROR_DIR}/${SAMPLE}/autoAchab.log"
+				#	exit 1
+				#fi
+			#fi
 		else
 			error "Folder incomplete or error in file names for sample ${SAMPLE}"
+			mv "${TODO_DIR}/${SAMPLE}" "${ERROR_DIR}"
 		fi
 	done
 fi
