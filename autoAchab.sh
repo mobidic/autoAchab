@@ -116,6 +116,7 @@ success() {
 		#launch $SAMPLE - conf - $LOG_FILE - (Genuine|Relaunched)
 	elif [ "$6" == "Relaunched" ];then
 		mv "${TODO_DIR}/$7" "${ERROR_DIR}"
+		rm -r "${DONE_DIR}/$7"
 		error "$7 was not treated correctly - Please contact an Admin to check log file at ${ERROR_DIR}/$7/autoAchab.log"
 		exit 1
 	fi
