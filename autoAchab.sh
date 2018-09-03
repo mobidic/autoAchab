@@ -92,6 +92,7 @@ fi
 
 
 ###############		functions for admin tasks
+q
 
 admin() { 
 	mkdir "$1"
@@ -115,7 +116,12 @@ success() {
 		launch "$7" "${CROMWELL_CONF_NODB_NOCACHE}" "$5" "Relaunched"
 		#launch $SAMPLE - conf - $LOG_FILE - (Genuine|Relaunched)
 	elif [ "$6" == "Relaunched" ];then
-		mv "${TODO_DIR}/$7" "${ERROR_DIR}"
+		#mv "${TODO_DIR}/$7" "${ERROR_DIR}"
+		"${RSYNC}" -az "${TODO_DIR}/$7" "${ERROR_DIR}"
+		if [ "$?" -eq 0 ];then
+			rm -r "${TODO_DIR}/$7"
+		fi
+		chmod -R 777 "${ERROR_DIR}/$7"
 		rm -r "${DONE_DIR}/$7"
 		error "$7 was not treated correctly - Please contact an Admin to check log file at ${ERROR_DIR}/$7/autoAchab.log"
 		exit 1
@@ -125,11 +131,11 @@ success() {
 launch() {
 	#launch $SAMPLE - conf - $LOG_FILE - (Genuine|Relaunched)
 	if [ "${ACHABILARITY}" -eq 0 ];then
-		${NOHUP} ${SH} ${CWW} -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "$2" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/$1/captainAchab_inputs.json" >>"$3" 2>&1
+		"${NOHUP}" "${SH}" "${CWW}" -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "$2" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/$1/captainAchab_inputs.json" >>"$3" 2>&1
 		success "$?" "${DONE_DIR}/$1/CaptainAchab/admin" "${TODO_DIR}/$1/captainAchab_inputs.json" "${TODO_DIR}/$1/disease.txt" "$3" "$4" "$1"
 		#success exit code - selfexpl - selfexpl - selfexpl - ${LOG_FILE} - (Genuine|Relaunched) - ${SAMPLE}
 	else
-		${NOHUP} ${SINGULARITY} run -B ${ANNOVAR_PATH} ${ACHABILARITY_SIMG} -o "${OPTIONS_JSON}" -c "$2" -i "${TODO_DIR}/$1/captainAchab_inputs.json" >>"$3" 2>&1
+		"${NOHUP}" "${SINGULARITY}" run -B "${ANNOVAR_PATH}:/media" -B "${DATA_MOUNT_POINT}:/mnt" ${ACHABILARITY_SIMG} -o "${OPTIONS_JSON}" -c "$2" -i "${TODO_DIR}/$1/captainAchab_inputs.json" >>"$3" 2>&1
 		success "$?" "${DONE_DIR}/$1/CaptainAchab/admin" "${TODO_DIR}/$1/captainAchab_inputs.json" "${TODO_DIR}/$1/disease.txt" "$3" "$4" "$1"
 	fi
 }
