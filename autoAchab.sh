@@ -105,9 +105,9 @@ admin() {
 success() {
 	#success exit code -"${DONE_DIR}/$1/CaptainAchab/admin" - "${TODO_DIR}/$1/captainAchab_inputs.json" - "${TODO_DIR}/$1/disease.txt" - ${LOG_FILE} - (Genuine|Relaunched) - ${SAMPLE}
 	if [ "$1" -eq 0 ];then
+		info "$6 Job finished for $7"
 		admin "$2" "$3" "$4" "$5" "$7"
 		#admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}" "${SAMPLE}"
-		info "$6 Job finished for $7"
 		rm -r "${TODO_DIR}/$7"
 	elif [ "$6" == "Genuine" ];then
 		warning "First attempt failed, relaunching $7 in nodb, nocache mode"
@@ -117,13 +117,13 @@ success() {
 		#launch $SAMPLE - conf - $LOG_FILE - (Genuine|Relaunched)
 	elif [ "$6" == "Relaunched" ];then
 		#mv "${TODO_DIR}/$7" "${ERROR_DIR}"
+		error "$7 was not treated correctly - Please contact an Admin to check log file at ${ERROR_DIR}/$7/autoAchab.log"
 		"${RSYNC}" -az "${TODO_DIR}/$7" "${ERROR_DIR}"
 		if [ "$?" -eq 0 ];then
 			rm -r "${TODO_DIR}/$7"
 		fi
 		chmod -R 777 "${ERROR_DIR}/$7"
 		rm -r "${DONE_DIR}/$7"
-		error "$7 was not treated correctly - Please contact an Admin to check log file at ${ERROR_DIR}/$7/autoAchab.log"
 		exit 1
 	fi
 }
