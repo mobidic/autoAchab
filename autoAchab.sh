@@ -92,7 +92,6 @@ fi
 
 
 ###############		functions for admin tasks
-q
 
 admin() { 
 	mkdir "$1"
