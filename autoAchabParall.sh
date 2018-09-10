@@ -20,7 +20,10 @@
 ####	This script is meant to be croned
 ####	must check the Todo directory
 ####	and launch captainAchab
-
+####	This version treats all folders in parallel
+####	therefore be careful
+####	either use a job scheduler with cromwell or singularity
+####	or ensure you won't break your server with too many samples
 
 ##############		If any option is given, print help message	##################################
 VERSION=1.0
@@ -67,7 +70,7 @@ log() {
 
 ###############		Get options from conf file			##################################
 
-CONFIG_FILE='/home/neuro_admin/autoAchab/autoAchab.conf'
+CONFIG_FILE='./autoAchabParall.conf'
 
 #we check params against regexp
 
