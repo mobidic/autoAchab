@@ -67,7 +67,7 @@ log() {
 
 ###############		Get options from conf file			##################################
 
-CONFIG_FILE='/home/neuro_admin/autoAchab/autoAchab.conf'
+CONFIG_FILE='./autoAchab.conf'
 
 #we check params against regexp
 
