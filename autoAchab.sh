@@ -163,7 +163,10 @@ if [ "${SAMPLES}" != '' ];then
 			launch "${SAMPLE}" "${CROMWELL_CONF}" "${LOG_FILE}" "Genuine"
 		else
 			error "Folder incomplete or error in file names for sample ${SAMPLE}"
-			mv "${TODO_DIR}/${SAMPLE}" "${ERROR_DIR}"
+			${RSYNC} -az "${TODO_DIR}/${SAMPLE}" "${ERROR_DIR}"
+			if [ "$?" -eq 0 ];then
+				rm -r "${TODO_DIR}/$7"
+			fi
 		fi
 	done
 fi
