@@ -1,0 +1,27 @@
+BASE_DIR=/RS_IURC/data/MobiDL/captainAchab
+TODO_DIR=${BASE_DIR}/Todo
+DONE_DIR=${BASE_DIR}/Done
+ERROR_DIR=${BASE_DIR}/Error
+OPTIONS_JSON=/softs/conf/options_monster.json
+CROMWELL_CONF=/softs/conf/monster.conf
+CROMWELL_CONF_NODB_NOCACHE=/softs/conf/monster_fs.conf
+SH=/usr/bin/sh
+NOHUP=/usr/bin/nohup
+RSYNC=/usr/bin/rsync
+SERVICE=autoAchab.sh
+#following variable should be set to 0 for execution outside a singularity container (achabilarity), to 1 otherwise
+ACHABILARITY=0
+#following path should be filled for execution outside a container
+CWW=/home/neuro_admin/MobiDL/cww.sh
+MOBIDL_DIR=/home/neuro_admin/MobiDL
+CAPTAINACHAB_WDL=${MOBIDL_DIR}/captainAchab.wdl
+CROMWELL_JAR=/softs/cromwell.jar
+#following path should be filled for execution inside a singularity container (achabilarity)
+SINGULARITY=
+ANNOVAR_PATH=
+ACHABILARITY_SIMG=
+DATA_MOUNT_POINT=
+DATA_MOUNTED_PATH=
+DATA_MOUNTED_TODO_DIR=
+#DATA_MOUNTED_DONE_DIR=
+#DATA_MOUNTED_ERROR_DIR=
