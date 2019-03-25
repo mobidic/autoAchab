@@ -42,18 +42,12 @@ if [ $# -ne 0 ]; then
 	exit 1
 fi
 
-RED='\033[0;31m'
-LIGHTRED='\033[1;31m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
 # -- Log functions got from cww.sh -- simplified here
 
-error() { log "[${RED}error${NC}]" "$1" ; }
-warning() { log "[${YELLOW}warn${NC}]" "$1" ; }
-info() { log "[${BLUE}info${NC}]" "$1" ; }
-debug() { log "[${LIGHTRED}debug${NC}]" "$1" ; }
+error() { log "[error]" "$1" ; }
+warning() { log "[warn]" "$1" ; }
+info() { log "[info]" "$1" ; }
+debug() { log "[debug]" "$1" ; }
 
 # -- Print log 
 
