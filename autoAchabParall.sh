@@ -150,7 +150,8 @@ treat_sample() {
 
 	LOG_FILE="${TODO_DIR}/${SAMPLE}/autoAchab.log"
 	touch ${LOG_FILE}
-	exec &>${LOG_FILE}
+	#exec &>${LOG_FILE}
+	exec 1>>${LOG_FILE} 2>&1
 	VCF=$(ls -l --time-style="long-iso" "${TODO_DIR}/${SAMPLE}" | egrep '^-' | awk '{print $8}' | egrep '*.vcf')	
 	if [ -f "${TODO_DIR}/${SAMPLE}/${VCF}" ] && [ -f "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" ] && [ -f "${TODO_DIR}/${SAMPLE}/disease.txt" ];then 	
 		echo ""
