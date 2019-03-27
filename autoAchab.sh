@@ -102,7 +102,7 @@ success() {
 		info "$6 Job finished for $7"
 		admin "$1" "$3" "$4" "$5" "$7"
 		#admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}" "${SAMPLE}"
-		exec 1 >> "${ERROR_DIR}/autoAchabError.log" 2>&1 
+		exec 1>>"${ERROR_DIR}/autoAchabError.log" 2>&1 
 		rm -r "${TODO_DIR}/$7"
 	elif [ "$6" == "Genuine" ];then
 		warning "First attempt failed, relaunching $7 in nodb, nocache mode"
@@ -114,7 +114,7 @@ success() {
 		#mv "${TODO_DIR}/$7" "${ERROR_DIR}"
 		error "$7 was not treated correctly - Please contact an Admin to check log file at ${ERROR_DIR}/$7/autoAchab.log"
 		"${RSYNC}" -az "${TODO_DIR}/$7" "${ERROR_DIR}"
-		exec 1 >> "${ERROR_DIR}/autoAchabError.log" 2>&1 
+		exec 1>>"${ERROR_DIR}/autoAchabError.log" 2>&1 
 		if [ "$?" -eq 0 ];then
 			rm -r "${TODO_DIR}/$7"
 		fi
@@ -161,8 +161,8 @@ if [ "${SAMPLES}" != '' ];then
 			error "Folder incomplete or error in file names for sample ${SAMPLE}"
 			${RSYNC} -az "${TODO_DIR}/${SAMPLE}" "${ERROR_DIR}"
 			if [ "$?" -eq 0 ];then
-				exec 1 >> "${ERROR_DIR}/autoAchabError.log" 2>&1 
-				rm -r "${TODO_DIR}/$7"
+				exec 1>>"${ERROR_DIR}/autoAchabError.log" 2>&1 
+				rm -r "${TODO_DIR}/${SAMPLE}"
 			fi
 		fi
 	done
