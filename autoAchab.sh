@@ -88,10 +88,12 @@ fi
 ###############		functions for admin tasks
 
 admin() { 
-	mkdir "$1"
-	cp "$2" "$1"
-	cp "$3" "$1"
-	cp "$4" "$1"
+	SAMPLE_OUT=$(awk -F"[ ,\"]" '/captainAchab.sampleID/{print $7}' "$2")
+	ADMIN_DIR="${DONE_DIR}/${SAMPLE_OUT}/$1"
+	mkdir "${ADMIN_DIR}"
+	cp "$2" "${ADMIN_DIR}"
+	cp "$3" "${ADMIN_DIR}"
+	cp "$4" "${ADMIN_DIR}"
 	rm -r "${DONE_DIR}/${SAMPLE}/CaptainAchab/disease/"
 	chmod -R 777 "${DONE_DIR}/$5"
 }
@@ -100,7 +102,7 @@ success() {
 	#success exit code -"${DONE_DIR}/$1/CaptainAchab/admin" - "${TODO_DIR}/$1/captainAchab_inputs.json" - "${TODO_DIR}/$1/disease.txt" - ${LOG_FILE} - (Genuine|Relaunched) - ${SAMPLE}
 	if [ "$1" -eq 0 ];then
 		info "$6 Job finished for $7"
-		admin "$1" "$3" "$4" "$5" "$7"
+		admin "$2" "$3" "$4" "$5" "$7"
 		#admin "${DONE_DIR}/${SAMPLE}/CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}" "${SAMPLE}"
 		exec 1>>"${ERROR_DIR}/autoAchabError.log" 2>&1 
 		rm -r "${TODO_DIR}/$7"
@@ -128,11 +130,11 @@ launch() {
 	#launch $SAMPLE - conf - $LOG_FILE - (Genuine|Relaunched)
 	if [ "${ACHABILARITY}" -eq 0 ];then
 		"${NOHUP}" "${SH}" "${CWW}" -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "$2" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/$1/captainAchab_inputs.json" >>"$3" 2>&1
-		success "$?" "${DONE_DIR}/$1/CaptainAchab/admin" "${TODO_DIR}/$1/captainAchab_inputs.json" "${TODO_DIR}/$1/disease.txt" "$3" "$4" "$1"
+		success "$?" "CaptainAchab/admin" "${TODO_DIR}/$1/captainAchab_inputs.json" "${TODO_DIR}/$1/disease.txt" "$3" "$4" "$1"
 		#success exit code - selfexpl - selfexpl - selfexpl - ${LOG_FILE} - (Genuine|Relaunched) - ${SAMPLE}
 	else
 		"${NOHUP}" "${SINGULARITY}" run -B "${ANNOVAR_PATH}:/media" -B "${DATA_MOUNT_POINT}:/mnt" ${ACHABILARITY_SIMG} -o "${OPTIONS_JSON}" -c "$2" -i "${DATA_MOUNTED_TODO_DIR}/$1/captainAchab_inputs.json" >>"$3" 2>&1
-		success "$?" "${DONE_DIR}/$1/CaptainAchab/admin" "${TODO_DIR}/$1/captainAchab_inputs.json" "${TODO_DIR}/$1/disease.txt" "$3" "$4" "$1"
+		success "$?" "CaptainAchab/admin" "${TODO_DIR}/$1/captainAchab_inputs.json" "${TODO_DIR}/$1/disease.txt" "$3" "$4" "$1"
 	fi
 }
 
