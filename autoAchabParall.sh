@@ -98,7 +98,7 @@ admin() {
 	cp "$2" "${ADMIN_DIR}"
 	cp "$3" "${ADMIN_DIR}"
 	cp "$4" "${ADMIN_DIR}"
-	rm -r "${DONE_DIR}/${SAMPLE_OUT}/CaptainAchab/disease/"
+	#rm -r "${DONE_DIR}/${SAMPLE_OUT}/CaptainAchab/disease/"
 	chmod -R 777 "${DONE_DIR}/$5"
 }
 
