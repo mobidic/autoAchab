@@ -88,7 +88,7 @@ fi
 ###############		functions for admin tasks
 
 admin() { 
-	SAMPLE_OUT=$(awk -F"[ ,\"]" '/captainAchab.sampleID/{print $7}' "$6")
+	SAMPLE_OUT=$(awk -F"[ ,\"]" '/captainAchab.sampleID/{print $7}' "$4")
 	ADMIN_DIR="${DONE_DIR}/${SAMPLE_OUT}/$1"
 	mkdir "${ADMIN_DIR}"
 	"${RSYNC}" -az --exclude '*.vcf' "$2" "${ADMIN_DIR}" 
@@ -105,7 +105,7 @@ success() {
 	if [ "$1" -eq 0 ];then
 		info "$4 Job finished for $5"
 		#admin "$2" "$3" "$4" "$5" "$7"
-		admin "$2" "${TODO_DIR}${SAMPLE}" "$5" "$6"
+		admin "$2" "${TODO_DIR}/${SAMPLE}/" "$5" "$6"
 		#admin "CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}" "${SAMPLE}"
 		exec 1>>"${ERROR_DIR}/autoAchabError.log" 2>&1 
 		rm -r "${TODO_DIR}/$5"
