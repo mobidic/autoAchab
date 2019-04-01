@@ -92,7 +92,7 @@ fi
 
 admin() { 
 	#if sample_dir ne json sampleid
-	SAMPLE_OUT=$(awk -F"[ ,\"]" '/captainAchab.sampleID/{print $7}' "$2")
+	SAMPLE_OUT=$(awk -F"[ ,\"]" '/captainAchab.sampleID/{print $7}' "$5")
 	ADMIN_DIR="${DONE_DIR}/${SAMPLE_OUT}/$1"
 	mkdir "${ADMIN_DIR}"
 	"${RSYNC}" -az --exclude '*.vcf' "$2" "${ADMIN_DIR}" 
@@ -109,7 +109,7 @@ success() {
 	if [ "$1" -eq 0 ];then
 		info "$3 Job finished for $4"
 		#admin "$2" "$3" "$4" "$5" "$7"
-		admin "$2" "${TODO_DIR}${SAMPLE}" "$4"
+		admin "$2" "${TODO_DIR}${SAMPLE}" "$4" "$5"
 		#admin "CaptainAchab/admin" "${TODO_DIR}/${SAMPLE}/captainAchab_inputs.json" "${TODO_DIR}/${SAMPLE}/disease.txt" "${LOG_FILE}" "${SAMPLE}"
 		exec 1>>"${ERROR_DIR}/autoAchabError.log" 2>&1 
 		rm -rf "${TODO_DIR}/$4"
@@ -132,11 +132,11 @@ launch() {
 		"${NOHUP}" "${SH}" "${CWW}" -e "${CROMWELL_JAR}" -o "${OPTIONS_JSON}" -c "$2" -w "${CAPTAINACHAB_WDL}" -i "${TODO_DIR}/$1/captainAchab_inputs.json" >>"$3" 2>&1
 		#success "$?" "CaptainAchab/admin" "${TODO_DIR}/$1/captainAchab_inputs.json" "${TODO_DIR}/$1/disease.txt" "$3" "$4" "$1"
 		#success exit code - selfexpl - selfexpl - selfexpl - ${LOG_FILE} - (Genuine|Relaunched) - ${SAMPLE}
-		success "$?" "CaptainAchab/admin" "$4" "$1"
-		#success exit code - selfexpl - (Genuine|Relaunched) - ${SAMPLE}
+		success "$?" "CaptainAchab/admin" "$4" "$1" "${TODO_DIR}/$1/captainAchab_inputs.json"
+		#success exit code - selfexpl - (Genuine|Relaunched) - ${SAMPLE} - selfexpl
 	else
 		"${NOHUP}" "${SINGULARITY}" run -B "${ANNOVAR_PATH}:/media" -B "${DATA_MOUNT_POINT}:/mnt" ${ACHABILARITY_SIMG} -o "${OPTIONS_JSON}" -c "$2" -i "${TODO_DIR}/$1/captainAchab_inputs.json" >>"$3" 2>&1
-		success "$?" "CaptainAchab/admin" "$4" "$1"
+		success "$?" "CaptainAchab/admin" "$4" "$1" "${TODO_DIR}/$1/captainAchab_inputs.json"
 	fi
 }
 
