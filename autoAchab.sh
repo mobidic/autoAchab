@@ -113,7 +113,7 @@ success() {
 		warning "First attempt failed, relaunching $5 in nodb, nocache mode"
 		info "to follow, check:"
 		info "tail -f $3"
-		launch "$7" "${CROMWELL_CONF_NODB_NOCACHE}" "$3" "Relaunched"
+		launch "$5" "${CROMWELL_CONF_NODB_NOCACHE}" "$3" "Relaunched"
 		#launch $SAMPLE - conf - $LOG_FILE - (Genuine|Relaunched)
 	elif [ "$4" == "Relaunched" ];then
 		#mv "${TODO_DIR}/$7" "${ERROR_DIR}"
