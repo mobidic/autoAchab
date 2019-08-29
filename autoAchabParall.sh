@@ -120,6 +120,7 @@ success() {
 		if [ "$?" -eq 0 ];then
 			rm -rf "${TODO_DIR}/$4"
 		fi
+		"${RSYNC}" -az "${DONE_DIR}/$4" "${ERROR_DIR}/$4"
 		chmod -R 777 "${ERROR_DIR}/$4"
 		rm -rf "${DONE_DIR}/$4"
 		exit 1
