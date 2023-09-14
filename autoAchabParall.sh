@@ -108,16 +108,29 @@ success() {
 		admin "$2" "${TODO_DIR}/${SAMPLE}/" "$4" "$5"
 		exec 1>>"${ERROR_DIR}/autoAchabError.log" 2>&1
 		rm -rf "${TODO_DIR}/$4"
+		# weirdly sometimes the dir remains from Cluster
+		if [ -d "${TODO_DIR}/$4" ]; then
+			rmdir "${TODO_DIR}/$4"
+		fi
+
 	else
 		error "$4 was not treated correctly - Please contact an Admin to check log file at ${ERROR_DIR}/$4/autoAchab.log"
 		"${RSYNC}" -az --no-g --chmod=ugo=rwX  "${TODO_DIR}/$4" "${ERROR_DIR}"
 		exec 1>>"${ERROR_DIR}/autoAchabError.log" 2>&1
 		if [ "$?" -eq 0 ];then
 			rm -rf "${TODO_DIR}/$4"
+			# weirdly sometimes the dir remains from Cluster
+			if [ -d "${TODO_DIR}/$4" ]; then
+				rmdir "${TODO_DIR}/$4"
+			fi
 		fi
 		"${RSYNC}" -az --no-g --chmod=ugo=rwX  "${DONE_DIR}/$4" "${ERROR_DIR}/$4"
 		chmod -R 777 "${ERROR_DIR}/$4"
 		rm -rf "${DONE_DIR}/$4"
+		# weirdly sometimes the dir remains from Cluster
+		if [ -d "${DONE_DIR}/$4" ]; then
+			rmdir "${DONE_DIR}/$4"
+		fi
 		exit 1
 	fi
 }
@@ -156,6 +169,10 @@ treat_sample() {
 		if [ "$?" -eq 0 ];then
 			exec 1>>"${ERROR_DIR}/autoAchabError.log" 2>&1
 			rm -rf "${TODO_DIR}/${SAMPLE}"
+			# weirdly sometimes the dir remains from Cluster
+			if [ -d "${TODO_DIR}/${SAMPLE}" ]; then
+				rmdir "${TODO_DIR}/${SAMPLE}"
+			fi			
 		fi
 	fi
 }
