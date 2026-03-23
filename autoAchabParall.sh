@@ -81,8 +81,7 @@ debug() { log "${DEBUG}" "[${LIGHTRED}debug${NC}]" "$1" ; }
 
 
 ###############		Get options from conf file			##################################
-# CONFIG_FILE='/bioinfo/softs/MobiDL_conf/autoAchabParall.conf'
-ONCFIG_FILE='./autoAchabParall.conf'
+CONFIG_FILE='./autoAchabParall.conf'
 
 ###############		Parse command line			##################################
 while [ "$1" != "" ];do
