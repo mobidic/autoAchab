@@ -43,7 +43,7 @@ usage() {
 	exit
 }
 version() {
-	echo "metaAutoDLML v${VERSION}"
+	echo "autoachabparall v${VERSION}"
 }
 # USAGE="
 # Program: AutoAchabParall
