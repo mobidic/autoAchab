@@ -30,7 +30,7 @@ VERSION=20260321
 usage() {
 	echo 'This script automates MobiDL captainAchab workflows.'
 	echo 'Program: AutoAchabparall'
-	echo 'Version: ${VERSION}'
+	echo "Version: ${VERSION}"
 	echo 'Contact: Baux David <david.baux@chu-montpellier.fr>'
 	echo 'Usage : bash AutoAchabparall.sh --config <path to conf file> [-v 4]'
 	echo '	Mandatory arguments :'
@@ -41,6 +41,9 @@ usage() {
 	echo '		* -h: 			show this help message and exit'
 	echo ''
 	exit
+}
+version() {
+	echo "metaAutoDLML v${VERSION}"
 }
 # USAGE="
 # Program: AutoAchabParall
@@ -97,6 +100,9 @@ while [ "$1" != "" ];do
 	case $1 in
 		-c | --config)	shift
 			CONFIG_FILE=$1			
+			;;
+		--version) version
+			exit
 			;;
 		-v | --verbosity) shift 
 			# Check if verbosity level argument is an integer before assignment 
